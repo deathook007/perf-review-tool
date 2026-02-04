@@ -1,0 +1,38 @@
+{
+  "name": "performance-review-generator",
+  "version": "1.0.0",
+  "displayName": "Performance Review Generator",
+  "author": "Deepak Bhatt",
+  "namespace": "deepak-bhatt",
+  "description": "Generate personalized performance review responses from objectives CSV files. Analyzes achievements, metrics, and role data to create unique narratives for 12 review sections (5 Objectives + 5 Competencies + 2 Open Questions). Use when the user wants to create performance reviews, self-assessments, or evaluation responses from CSV data.",
+  "repository": "https://github.com/deepak-bhatt/cursor-skills",
+  "license": "MIT",
+  "keywords": [
+    "performance-review",
+    "csv",
+    "objectives",
+    "self-assessment",
+    "evaluation",
+    "hr",
+    "performance-management"
+  ],
+  "main": "SKILL.md",
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "QUICKSTART.md",
+    "EXAMPLES.md",
+    "parse_csv.py",
+    "generate_review.py",
+    "prompt_templates.py",
+    "validate_review.py",
+    "test_skill.sh"
+  ],
+  "dependencies": {
+    "python": ">=3.7"
+  },
+  "scripts": {
+    "test": "./test_skill.sh",
+    "install": "chmod +x *.py test_skill.sh"
+  }
+}
