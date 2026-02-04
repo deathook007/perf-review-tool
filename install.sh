@@ -1,103 +1,86 @@
 #!/bin/bash
-# Quick Install Script for Performance Review Generator
-# Usage: curl -fsSL https://your-url/install.sh | bash
-
 set -e
 
-SKILL_NAME="performance-review-generator"
-SKILL_DIR="$HOME/.cursor/skills/$SKILL_NAME"
-REPO_URL="https://github.com/deepak-bhatt/cursor-skills/$SKILL_NAME"
+# Performance Review Generator - Installation Script
+# Repository: https://github.com/deathook007/perf-review-tool
 
-echo "🚀 Installing Performance Review Generator skill..."
+echo "🚀 Installing Performance Review Generator..."
 echo ""
 
-# Check prerequisites
-if ! command -v python3 &> /dev/null; then
-    echo "❌ Error: Python 3 is required but not installed."
-    echo "   Install Python 3.7+ and try again."
-    exit 1
+# Define installation directory
+SKILL_DIR="$HOME/.cursor/skills/performance-review-generator"
+
+# Check if Cursor skills directory exists
+if [ ! -d "$HOME/.cursor/skills" ]; then
+    echo "📁 Creating Cursor skills directory..."
+    mkdir -p "$HOME/.cursor/skills"
 fi
 
-# Create skills directory
-mkdir -p "$HOME/.cursor/skills"
-
-# Check if skill already exists
+# Remove existing installation if present
 if [ -d "$SKILL_DIR" ]; then
-    echo "⚠️  Skill already installed at: $SKILL_DIR"
-    read -p "   Do you want to update it? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Installation cancelled."
-        exit 0
-    fi
+    echo "🗑️  Removing existing installation..."
     rm -rf "$SKILL_DIR"
 fi
 
-# Install method 1: From Git (if available)
-if command -v git &> /dev/null && [ -n "$REPO_URL" ]; then
-    echo "📦 Cloning from repository..."
-    git clone "$REPO_URL" "$SKILL_DIR" 2>/dev/null || {
-        echo "⚠️  Git clone failed, falling back to download..."
-        INSTALL_METHOD="download"
-    }
+# Clone the repository
+echo "📦 Downloading from GitHub..."
+if command -v git &> /dev/null; then
+    if git clone https://github.com/deathook007/perf-review-tool.git "$SKILL_DIR" 2>/dev/null; then
+        echo "   ✓ Successfully cloned repository"
+    else
+        echo "⚠️  Git clone failed, trying alternative method..."
+        # Download as zip
+        curl -L https://github.com/deathook007/perf-review-tool/archive/refs/heads/main.zip -o /tmp/perf-review-tool.zip
+        unzip -q /tmp/perf-review-tool.zip -d /tmp/
+        mkdir -p "$SKILL_DIR"
+        cp -r /tmp/perf-review-tool-main/* "$SKILL_DIR/"
+        rm -rf /tmp/perf-review-tool.zip /tmp/perf-review-tool-main
+        echo "   ✓ Downloaded and extracted"
+    fi
 else
-    INSTALL_METHOD="download"
+    echo "⚠️  Git not found. Downloading as zip..."
+    curl -L https://github.com/deathook007/perf-review-tool/archive/refs/heads/main.zip -o /tmp/perf-review-tool.zip
+    unzip -q /tmp/perf-review-tool.zip -d /tmp/
+    mkdir -p "$SKILL_DIR"
+    cp -r /tmp/perf-review-tool-main/* "$SKILL_DIR/"
+    rm -rf /tmp/perf-review-tool.zip /tmp/perf-review-tool-main
+    echo "   ✓ Downloaded and extracted"
 fi
 
-# Install method 2: Download ZIP (fallback)
-if [ "$INSTALL_METHOD" = "download" ]; then
-    echo "📦 Downloading skill package..."
-    
-    # Try with curl
-    if command -v curl &> /dev/null; then
-        curl -fsSL "https://your-cdn/performance-review-generator.zip" -o /tmp/skill.zip
-    # Try with wget
-    elif command -v wget &> /dev/null; then
-        wget -q "https://your-cdn/performance-review-generator.zip" -O /tmp/skill.zip
-    else
-        echo "❌ Error: Neither curl nor wget found. Cannot download skill."
-        exit 1
-    fi
-    
-    # Extract
-    echo "📦 Extracting..."
-    unzip -q /tmp/skill.zip -d "$HOME/.cursor/skills/"
-    rm /tmp/skill.zip
+# Remove .git directory if present (clean installation)
+if [ -d "$SKILL_DIR/.git" ]; then
+    rm -rf "$SKILL_DIR/.git"
 fi
 
 # Make scripts executable
-cd "$SKILL_DIR"
-chmod +x *.py test_skill.sh 2>/dev/null || true
+echo "🔧 Setting up permissions..."
+chmod +x "$SKILL_DIR"/*.py 2>/dev/null || true
+chmod +x "$SKILL_DIR"/*.sh 2>/dev/null || true
 
-# Run tests
-echo ""
-echo "🧪 Running tests..."
-if ./test_skill.sh > /dev/null 2>&1; then
-    echo "✅ Tests passed!"
-else
-    echo "⚠️  Tests failed, but installation completed."
-    echo "   You can still use the skill - check documentation for help."
+# Check Python installation
+echo "🐍 Checking Python..."
+if ! command -v python3 &> /dev/null; then
+    echo "❌ Python 3 is required but not found."
+    echo "   Install Python 3: https://www.python.org/downloads/"
+    exit 1
 fi
 
+PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2)
+echo "   ✓ Python $PYTHON_VERSION found"
+
+# Success message
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "✅ Performance Review Generator installed!"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ Installation Complete!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "📍 Location: $SKILL_DIR"
+echo "📍 Installed to: $SKILL_DIR"
 echo ""
-echo "🚀 Quick Start:"
+echo "🎯 Usage in Cursor AI:"
+echo "   Just say: 'Use performance-review-generator to create my review'"
 echo ""
-echo "   In Cursor:"
-echo '   "Use performance-review-generator skill to create my review"'
+echo "📝 Direct Command Line Usage:"
+echo "   python3 $SKILL_DIR/generate_review.py YOUR_FILE.csv --role 'SDE 2' -o review.md"
 echo ""
-echo "   Command line:"
-echo "   cd $SKILL_DIR"
-echo "   python3 generate_review.py ~/Downloads/objectives.csv"
-echo ""
-echo "📚 Documentation:"
-echo "   $SKILL_DIR/QUICKSTART.md"
-echo "   $SKILL_DIR/README.md"
-echo ""
-echo "🎉 Ready to transform your performance reviews!"
+echo "📖 Documentation: https://github.com/deathook007/perf-review-tool"
 echo ""
